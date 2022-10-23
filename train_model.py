@@ -71,7 +71,7 @@ clf = RandomForestClassifier(random_state=args.random_state,
 
 with mlflow.start_run(run_name='RandomForestPipeline') as run:
     clf.fit(X_train, y_train)
-    mlflow.sklearn.eval_and_log_metrics(pipeline,
+    mlflow.sklearn.eval_and_log_metrics(clf,
                                         X_test,
                                         y_test,
                                         prefix="test_")
