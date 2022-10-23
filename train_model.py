@@ -18,6 +18,15 @@ parser.add_argument('--tracking_username', required=True)
 parser.add_argument('--tracking_password', required=True)
 parser.add_argument('--registry_model_name', required=True)
 
+parser.add_argument('--local_data_path', required=True)
+parser.add_argument('--random_state', required=True, type=int)
+parser.add_argument('--train_variables_file_name', required=True)
+parser.add_argument('--train_response_file_name', required=True)
+parser.add_argument('--test_variables_file_name', required=True)
+parser.add_argument('--test_response_file_name', required=True)
+parser.add_argument('--file_encoding', required=True)
+parser.add_argument('--file_separator', required=True)
+
 
 mlflow.sklearn.autolog(log_models=True,
                        log_input_examples=True,
@@ -34,17 +43,34 @@ os.environ['MLFLOW_TRACKING_PASSWORD'] = MLFLOW_TRACKING_PASSWORD
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 mlflow_client = MlflowClient(tracking_uri=MLFLOW_TRACKING_URI)
 
-clf = RandomForestClassifier(random_state=42,
+
+X_train = pd.read_csv(os.path.join(args.local_data_path,
+                                   args.train_variables_file_name),
+                      sep=args.file_separator,
+                      encoding=args.file_encoding)
+
+X_test = pd.read_csv(os.path.join(args.local_data_path,
+                                  args.test_variables_file_name),
+                     sep=args.file_separator,
+                     encoding=args.file_encoding)
+
+y_train = pd.read_csv(os.path.join(args.local_data_path,
+                                   args.train_response_file_name),
+                      sep=args.file_separator,
+                      encoding=args.file_encoding)
+
+y_test = pd.read_csv(os.path.join(args.local_data_path,
+                                  args.test_response_file_name),
+                     sep=args.file_separator,
+                     encoding=args.file_encoding)
+
+
+clf = RandomForestClassifier(random_state=args.random_state,
                              verbose=1,
                              n_estimators=30)
 
-pipeline = Pipeline(steps=[
-    ('StandardScaler', scaler),
-    ('RandomForest', clf)
-])
-
 with mlflow.start_run(run_name='RandomForestPipeline') as run:
-    pipeline.fit(X_train, y_train)
+    clf.fit(X_train, y_train)
     mlflow.sklearn.eval_and_log_metrics(pipeline,
                                         X_test,
                                         y_test,

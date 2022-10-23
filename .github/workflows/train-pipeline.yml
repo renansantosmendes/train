@@ -10,11 +10,11 @@ on:
     - main
 
 jobs:
-  train_pipeline:
+  process-data:
       runs-on: ubuntu-latest
 
       steps:
-      - uses: actions/checkout@v2
+#      - uses: actions/checkout@v2
 
       - name: Install dependencies
         run: |
@@ -24,5 +24,9 @@ jobs:
       - name: Process data
         run: python data_processing.py --base_data_url ${{secrets.BASE_DATA_URL}} --data_file_name ${{secrets.DATA_FILE_NAME}} --local_data_path ${{secrets.LOCAL_DATA_PATH}} --test_size ${{secrets.TEST_SIZE}} --random_state ${{secrets.RANDOM_STATE}} --train_variables_file_name ${{secrets.TRAIN_VARIABLES_FILE_NAME}} --train_response_file_name ${{secrets.TRAIN_RESPONSE_FILE_NAME}} --test_variables_file_name ${{secrets.TEST_VARIABLES_FILE_NAME}} --test_response_file_name ${{secrets.TEST_RESPONSE_FILE_NAME}} --file_encoding ${{secrets.FILE_ENCODING}} --file_separator ${{secrets.FILE_SEPARATOR}}
 
-      - name: Train model
-        run: python train_model.py --tracking_uri ${{secrets.MLFLOW_TRACKING_URI}} --tracking_username ${{secrets.MLFLOW_TRACKING_USERNAME}} --tracking_password ${{secrets.MLFLOW_TRACKING_PASSWORD}} --registry_model_name ${{secrets.MLFLOW_REGISTRY_MODEL_NAME}}
+  train_pipeline:
+      runs-on: ubuntu-latest
+      needs: [process-data]
+      steps:
+        - name: Train model
+          run: python train_model.py --tracking_uri ${{secrets.MLFLOW_TRACKING_URI}} --tracking_username ${{secrets.MLFLOW_TRACKING_USERNAME}} --tracking_password ${{secrets.MLFLOW_TRACKING_PASSWORD}} --registry_model_name ${{secrets.MLFLOW_REGISTRY_MODEL_NAME}} --local_data_path ${{secrets.LOCAL_DATA_PATH}} --random_state ${{secrets.RANDOM_STATE}} --train_variables_file_name ${{secrets.TRAIN_VARIABLES_FILE_NAME}} --train_response_file_name ${{secrets.TRAIN_RESPONSE_FILE_NAME}} --test_variables_file_name ${{secrets.TEST_VARIABLES_FILE_NAME}} --test_response_file_name ${{secrets.TEST_RESPONSE_FILE_NAME}} --file_encoding ${{secrets.FILE_ENCODING}} --file_separator ${{secrets.FILE_SEPARATOR}}
