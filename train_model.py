@@ -22,6 +22,8 @@ mlflow.sklearn.autolog(log_models=True,
                        log_input_examples=True,
                        log_model_signatures=True)
 
+args = parser.parse_args()
+
 MLFLOW_TRACKING_URI = args.tracking_uri
 MLFLOW_TRACKING_USERNAME = args.tracking_username
 MLFLOW_TRACKING_PASSWORD = args.tracking_password
